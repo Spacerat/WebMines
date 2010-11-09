@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="static/logic.js"></script>
+        <title>Dis an title</title>
+        <script type="text/javascript">
+            function Start() {
+                var xmlhttp=new XMLHttpRequest();
+                var b = new Board(10,10);
+                var canv = document.getElementById("Canvas");
+                b.renderToCanvas(canv);
+                canv.addEventListener("click", function(e){
+                    var xcoord = Math.floor((e.clientX-canv.offsetLeft)/(canv.width/b.width));
+                    var ycoord = Math.floor((e.clientY-canv.offsetTop)/(canv.height/b.height));
+
+                    //Send the click to the server
+
+                }, false)
+            }
+        </script>
+    </head>
+    <body onload="Start();">
+        <canvas id ="Canvas" width ="400" height="400">
+            You need a HTML5-capable browser to play this game.
+        </canvas>
+
+        
+    </body>
+</html>
