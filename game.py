@@ -1,12 +1,92 @@
 
-from random import randint
+from random import randint, choice
+import string
 
 #In order of increasing wordyness
-class BoardException(Exception): pass
-class BoardTooSmallException(BoardException): pass
-class BoardTooManyBombsException(BoardException): pass
-class BoardCoordOutOfRangeExcepton(BoardException): pass
+class BoardError(Exception): pass
+class BoardTooSmallError(BoardError): pass
+class BoardTooManyBombsError(BoardError): pass
+class BoardCoordOutOfRangeExcepton(BoardError): pass
 
+class GameError(Exception): pass
+class GameNameTakenError(GameError): pass
+class GameInvalidPlayer(GameError, TypeError): pass
+
+def GenID(length=8):
+    idchars = string.letters + string.digits
+    id=''
+    for x in range(8):
+        id+=choice(idchars)  
+    return id
+
+class Player():
+    
+    players={}
+    
+    def __init__(self,name):
+        self.name = name
+        self.id=''
+        while (self.id=='' or self.id in Player.players):
+            self.id = GenID()
+        self.games = []
+        Player.players[self.id] = self
+    
+    #Add a game to this player's list of current games
+    def add_game(self,game):
+        self.games.append(game)
+        
+    #Remove a game from this player's list of current games.
+    #Remove the player if this removes the last game.
+    def remove_game(self,game):
+        self.games.remove(game)
+        if len(self.games)==0:
+            self.disconnect()
+    
+    def disconnect(self):
+        del Player.players[self.id]
+
+class Game():
+    
+    games={}
+    
+    def __init__(self,name,width=10,height=10,mines=-1,wrap=False):
+        for g in Game.games.values():
+            if g.name == name:
+                raise GameNameTakenError, "Game name already taken."
+        
+        self.started = False
+        self.name = name
+        self.board = Board(width,height,mines,wrap)
+        #generate random id
+        id = ''
+        while (id=='' or id in Game.games):
+            id=GenID()
+
+        self.id = id
+        Game.games[id] = self
+        self.players=[]
+        
+    @property
+    def width(self): return self.game.width
+    @property
+    def height(self): return self.game.height
+        
+    def add_player(self,player):
+        if isinstance(player,Player):
+            p = player
+        elif isinstance(player,basestring):
+            p = Player(str(player))
+        else:
+            raise GameInvalidPlayer, "Expecting Player or basestring, got "+str(type(player))
+        
+        self.players.append(p)
+        return
+        
+    def close(self):
+        for p in self.players:
+            p.remove_game(self)
+        del Game.games[self.id]
+        
 class Tile:
     def __init__(self,pos,is_bomb=False):
         self.bomb = is_bomb
@@ -20,11 +100,10 @@ class Tile:
         if self.bomb: return "X|"+str(self.uncovered)
         return str(self.adjacency) + "|" + str(self.uncovered)
         
-
 class Board:
     def __init__(self,width,height,bombs=-1,wrap=False):
         if width<4 or height<4:
-            raise BoardTooSmallException, "The game board (%dx%d) must be larger than 3x3."%(width,height)
+            raise BoardTooSmallError, "The game board (%dx%d) must be larger than 3x3."%(width,height)
         
         #Set settings
         self.width=width
@@ -33,7 +112,7 @@ class Board:
         self.wrap=wrap
         if bombs==-1: self.bombs =  int(((width*height)-9)/7)
         if width*height-14<self.bombs:
-            raise BoardTooManyBombsException, "%d bombs is too many. The largest allowed number of bombs is width*height-14 = %d"%(self.bombs,width*height-14)
+            raise BoardTooManyBombsError, "%d bombs is too many. The largest allowed number of bombs is width*height-14 = %d"%(self.bombs,width*height-14)
         
         #Initialise array
         self.tiles=[[Tile((col,row)) for col in range(height)] for row in range(width)]
@@ -80,7 +159,7 @@ class Board:
         if self.is_bomb(x,y): return False
         t = self.get_tile(x,y)
         if t==None:
-            raise BoardCoordOutOfRangeExcepton, "Tile coordinate (%d,%d) out of bounds"%(x,y)
+            raise BoardCoordOutOfRangeError, "Tile coordinate (%d,%d) out of bounds"%(x,y)
         t.bomb = True
         for x in self.get_adjacent_tiles(x,y):
             x.adjacency+=1
@@ -94,25 +173,33 @@ class Board:
 
     
     #Return a list of revealed tiles
-    def reveal(self,player,x,y, list=[]):
-        if list==[]: 
-            first=True
-        else:
-            first=False
+    def reveal(self,player,x,y):
+        ret = self._recurse_reveal(player, x, y)
+        for l in self.tiles:
+            for t in l:
+                t._checked = False
+        return ret
+                
+    def _recurse_reveal(self,player,x,y):
+        
         t = self.get_tile(x,y)
-        if t._checked == True: return
-        if not t: raise BoardCoordOutOfRangeExcepton, "Tile coordinate (%d,%d) out of bounds"%(x,y)
+        if not t: return
+        if t._checked: return
         t._checked = True
-        if t.uncovered == 0:
+        
+        if t.uncovered == 0:  
             t.uncovered = player
-            list.append(t)
+            ret = [t]
             if t.adjacency==0:
-                for a in self.get_adjacent_tiles(x, y):
-                    self.reveal(player,*a.pos,list=list)
-        if first:
-            for l in self.tiles:
-                for t in l:
-                    t._checked = False
+                #For some reason, get_adjacent_tiles was breaking this.
+                for xx in range(x-1,x+2):
+                    for yy in range(y-1,y+2):
+                        con = self._recurse_reveal(player,xx,yy)
+                        if con: ret += con
+                        
+            t._checked=1
+            return ret
+        
     
     def __str__(self):
         s=""
@@ -125,5 +212,11 @@ class Board:
 
 if __name__ == "__main__":
     b = Board(10,10)
-    b.reveal(1,0,0)
     print b
+    print ""
+    print [t.pos for t in b.reveal(1,0,0)]
+    print ""
+    print b
+
+    
+    
