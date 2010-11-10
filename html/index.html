@@ -1,4 +1,13 @@
 <!DOCTYPE HTML>
+#def playerbox
+    #if $getVar('$player.name',None)
+    Player name: $player.name <br />
+    <!--<input type="hidden" name="pname" value="$player.name" />-->
+    #else
+    Player name: <input type="text" name="pname" /><br />
+    #end if
+#end def
+
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -6,12 +15,23 @@
     </head>
     <body>
         <h1>$title</h1>
-        <form method="post" action="">
-            <select name="games" size="$numgames">
+        <h2>Join game</h2>
+        <form method="get" action="join" name="join">
+            $playerbox
+            <select name="id" size="$numgames">
                 #for $game in $games
                 <option value="$game.id">$game.name</option>
                 #end for
             </select>
+            <input type="submit" value="Join"/>
         </form>
+        <h2>Create game</h2>
+        <form method="post" action="create" name="create">
+        $playerbox
+        Game name: <input type="text" name="name" />
+        
+        <input type="submit" value="Create"/>
+        </form>
+        
     </body>
 </html>

@@ -3,11 +3,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="static/logic.js"></script>
-        <title>Dis an title</title>
+        <title>$title game: $game.name</title>
         <script type="text/javascript">
             function StartGame() {
                 var xmlhttp=new XMLHttpRequest();
-                var b = new Board(10,10);
+                var b = new Board($game.board.width,$game.board.height);
                 var canv = document.getElementById("Canvas");
                 b.renderToCanvas(canv);
                 canv.addEventListener("click", function(e){
@@ -21,8 +21,16 @@
         </script>
     </head>
     <body onload="StartGame();">
+        <h1>$title</h1>
+        <h2>$game.name</h2>
         <canvas id ="Canvas" width ="400" height="400">
             You need a HTML5-capable browser to play this game.
         </canvas>
+       <h3>Players</h3>
+       <ul>
+       #for $player in $players
+       <li>$player.name</li>
+       #end for
+       </ul>
     </body>
 </html>
