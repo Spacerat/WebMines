@@ -2,17 +2,27 @@
 import cherrypy
 import os
 import threading
+from Cheetah.Template import Template
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
+class ListedGame:
+    def __init__(self,name,id):
+        self.name=name
+        self.id=id
+
 class Root:
-    
-    def __init__(self):
-        self.html = {}
     
     @cherrypy.expose
     def index(self):
-        return open('static/index.html').read()
+        data = {}
+        data['title']='MultiMines'
+        data['games']=[]
+        data['numgames'] = max(len(data['games']),10)
+        
+        t = Template(file='html/index.html',searchList=[data])
+        return t.respond()
+        
         
 class InputThread(threading.Thread):
     def run(self):
@@ -23,8 +33,6 @@ class InputThread(threading.Thread):
                 go = False
                 cherrypy.engine.exit()
 
-InputThread().start()
-
 if __name__ == "__main__":
-    cherrypy.config.update('config.cfg')
-    cherrypy.quickstart(Root(),'/')
+    InputThread().start()
+    cherrypy.quickstart(Root(),'/','config.cfg')
