@@ -3,27 +3,29 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="static/logic.js"></script>
+        <script type="text/javascript" src="static/ajax.js"></script>
         <title>$title game: $game.name</title>
         <script type="text/javascript">
             function StartGame() {
-                var xmlhttp=new XMLHttpRequest();
                 var b = new Board($game.board.width,$game.board.height);
                 var canv = document.getElementById("Canvas");
                 b.renderToCanvas(canv);
                 canv.addEventListener("click", function(e){
                     var xcoord = Math.floor((e.clientX-canv.offsetLeft)/(canv.width/b.width));
                     var ycoord = Math.floor((e.clientY-canv.offsetTop)/(canv.height/b.height));
-
-                    //Do something with mouse click.
+                    
+                    
+                    SendClick(xcoord,ycoord,b);
 
                 }, false)
+                Refresh(b);
             }
         </script>
     </head>
     <body onload="StartGame();">
         <h1>$title</h1>
         <h2>$game.name</h2>
-        <canvas id ="Canvas" width ="400" height="400">
+        <canvas id ="Canvas" width ="$($game.board.width*40)" height="$($game.board.height*40)">
             You need a HTML5-capable browser to play this game.
         </canvas>
        <h3>Players</h3>

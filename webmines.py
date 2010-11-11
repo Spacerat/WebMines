@@ -3,25 +3,20 @@ import cherrypy
 from cherrypy import expose
 import os
 import threading
-from game import Game, Player
+import json
+import time
+from random import randint
 from Cheetah.Template import Template
+
+from game import Game, Player
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 website_title = 'MultiMines'
 
 class Site():
-    def get_session_id(self,name=''):
-        id = cherrypy.session.get('id')
-        if id==None and name!='':
-            p = Player(name)
-            cherrypy.session['id'] = p.id
-            cherrypy.session['name'] = p.name
-            id = p.id
-        return id
-    
     def get_session_player(self,name=''):
         id = cherrypy.session.get('id')
-        print "sessionid",id
         if id==None and name!='':
             p = Player(name)
             cherrypy.session['id'] = p.id
@@ -73,13 +68,63 @@ class RootHandler(Site):
         
         
 class GameHandler(Site):
+    
+    polls = {}
+    
+    def encodetiles(self,tilelist):
+        if not tilelist: return ''
+        r=''
+        for t in tilelist:
+            #The browser swaps the X and Y values, it seems.
+            r+="%d%d%d"%(t.pos[1],t.pos[0],t.uncovered)
+            if t.bomb:
+                r+="X"
+            else:
+                r+=str(t.adjacency)
+        return r        
+    
+    def clickresponse(self,game,player,x,y):
+        return self.encodetiles(game.click(player,x,y))
+    
+    def send_data(self,data):
+        for p in GameHandler.polls:
+            GameHandler.polls[p] = data       
+    
     @cherrypy.expose
     def default(self,*args,**kwargs):
         response = ""
         id = args[0]
-        player = self.get_session_player()
+        player = self.get_session_player() 
+        action = kwargs.get('action','')
         if id in Game.games:
             game = Game.games[id]
+        else:
+            raise Exception, "Invalid game ID"
+        if action=='click':
+            data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
+            if data: self.send_data(json.dumps({'reveal':data}))
+            
+        elif action=='refresh':
+            l = []
+            for row in game.board.tiles:
+                l+=row
+            data = self.encodetiles(l)
+            if data: return json.dumps({'reveal':data})
+            
+        elif action=='poll':
+            pollid=0
+            #Add a poll request to the poll list
+            while pollid==0 or pollid in GameHandler.polls.keys():
+                pollid = randint(0,10000)
+            GameHandler.polls[pollid] = '{}'
+            #wait until the request is filled
+            cherrypy.session.save()
+            while GameHandler.polls[pollid]=='{}':
+                time.sleep(0.1)
+            response = GameHandler.polls[pollid]
+            del GameHandler.polls[pollid]
+            
+        elif action=='':
             data = {
                 'title':website_title,
                 'game':game,
@@ -89,9 +134,8 @@ class GameHandler(Site):
             }
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()
-        else:
-            response = "This is not a valid game."
-            
+
+        
         return response
 
 

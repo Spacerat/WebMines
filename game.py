@@ -72,15 +72,19 @@ class Game():
     def height(self): return self.game.height
         
     def add_player(self,player):
-        if isinstance(player,Player):
-            p = player
-        elif isinstance(player,basestring):
-            p = Player(str(player))
-        else:
-            raise GameInvalidPlayer, "Expecting Player or basestring, got "+str(type(player))
+        if not isinstance(player,Player):
+            raise GameInvalidPlayer, "Expecting Player, got "+str(type(player))
         
-        self.players.append(p)
+        if not player in self.players:
+            self.players.append(player)
         return
+        
+    def click(self,player,x,y):
+        if self.board.is_bomb(x,y):
+            return [self.board.get_tile(x,y)]
+        pid = self.players.index(player)+1
+        return self.board.reveal(pid,x,y)
+        
         
     def close(self):
         for p in self.players:
@@ -190,7 +194,7 @@ class Board:
         if t.uncovered == 0:  
             t.uncovered = player
             ret = [t]
-            if t.adjacency==0:
+            if t.adjacency==0 and not t.bomb:
                 #For some reason, get_adjacent_tiles was breaking this.
                 for xx in range(x-1,x+2):
                     for yy in range(y-1,y+2):
