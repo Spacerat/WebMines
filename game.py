@@ -20,30 +20,10 @@ def GenID(length=8):
     return id
 
 class Player():
-    
-    players={}
-    
-    def __init__(self,name):
+       
+    def __init__(self,name,id):
         self.name = name
-        self.id=''
-        while (self.id=='' or self.id in Player.players):
-            self.id = GenID()
-        self.games = []
-        Player.players[self.id] = self
-    
-    #Add a game to this player's list of current games
-    def add_game(self,game):
-        self.games.append(game)
-        
-    #Remove a game from this player's list of current games.
-    #Remove the player if this removes the last game.
-    def remove_game(self,game):
-        self.games.remove(game)
-        if len(self.games)==0:
-            self.disconnect()
-    
-    def disconnect(self):
-        del Player.players[self.id]
+        self.id = id
 
 class Game():
     
@@ -61,7 +41,6 @@ class Game():
         id = ''
         while (id=='' or id in Game.games):
             id=GenID()
-
         self.id = id
         Game.games[id] = self
         self.players=[]
@@ -71,26 +50,27 @@ class Game():
     @property
     def height(self): return self.game.height
         
-    def add_player(self,player):
-        if not isinstance(player,Player):
-            raise GameInvalidPlayer, "Expecting Player, got "+str(type(player))
-        
-        if not player in self.players:
-            self.players.append(player)
-        return
-        
+    def add_player(self,name):
+        while name in [p.name for p in self.players]:
+            name+=str(randint(0,9))
+        p = Player(name,len(self.players)+1)
+        self.players.append(p)
+        return p
+
+    def get_player(self,id):
+        return self.players[id-1]
+
     def click(self,player,x,y):
         if self.board.is_bomb(x,y):
-            return [self.board.get_tile(x,y)]
-        pid = self.players.index(player)+1
-        return self.board.reveal(pid,x,y)
-        
+            t = self.board.get_tile(x,y)
+            t.uncovered = player.id
+            return [t]
+        return self.board.reveal(player.id,x,y)
         
     def close(self):
-        for p in self.players:
-            p.remove_game(self)
         del Game.games[self.id]
-        
+
+
 class Tile:
     def __init__(self,pos,is_bomb=False):
         self.bomb = is_bomb
