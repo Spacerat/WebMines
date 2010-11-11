@@ -158,7 +158,6 @@ class InputThread(threading.Thread):
                 cherrypy.engine.exit()
 
 if __name__ == "__main__":
-    InputThread().start()
     
     cherrypy.tree.mount(GameHandler(),'/game','config.cfg')
     cherrypy.quickstart(RootHandler(),'/','config.cfg')
