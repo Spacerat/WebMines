@@ -10,7 +10,6 @@ from Cheetah.Template import Template
 
 from game import Game, Player
 
-
 current_dir = os.path.dirname(os.path.abspath(__file__))
 website_title = 'MultiMines'
 
@@ -137,8 +136,6 @@ class GameHandler(Site):
 
         
         return response
-
-
         
 class InputThread(threading.Thread):
     def run(self):

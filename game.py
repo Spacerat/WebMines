@@ -221,6 +221,3 @@ if __name__ == "__main__":
     print [t.pos for t in b.reveal(1,0,0)]
     print ""
     print b
-
-    
-    
