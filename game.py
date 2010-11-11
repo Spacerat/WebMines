@@ -49,7 +49,7 @@ class Game():
     
     games={}
     
-    def __init__(self,name,width=10,height=10,mines=-1,wrap=False):
+    def __init__(self,name,width=18,height=16,mines=-1,wrap=False):
         for g in Game.games.values():
             if g.name == name:
                 raise GameNameTakenError, "Game name already taken."
