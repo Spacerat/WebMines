@@ -4,35 +4,72 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="static/logic.js"></script>
         <script type="text/javascript" src="static/ajax.js"></script>
+        <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
         <title>$title game: $game.name</title>
         <script type="text/javascript">
-            function StartGame() {
-                var b = new Board($game.board.width,$game.board.height);
-                var canv = document.getElementById("Canvas");
-                b.renderToCanvas(canv);
-                canv.addEventListener("click", function(e){
-                    var xcoord = Math.floor((e.clientX-canv.offsetLeft)/(canv.width/b.width));
-                    var ycoord = Math.floor((e.clientY-canv.offsetTop)/(canv.height/b.height));
-                    
-                    
-                    SendClick(xcoord,ycoord,b);
 
-                }, false)
-                Refresh(b);
-            }
+             Page = new function () {
+                this.Start = function() {
+                    /*
+                     * The Game is a global object (there only needs to be one).
+                     * However, in order to avoid reliance on this fact, it is often
+                     * still passed around in functions, for example, Net.Refresh(game).
+                     */
+                    Game.Init($game.board.width,$game.board.height);
+                    #raw
+                    var canvas = document.getElementById("Canvas");
+
+                    //Here we define how the game is rendered
+                    //notice that 'this' is an instance of Game.
+                    Game.renderGameFunc = function() {
+                        canvas.width = canvas.width;
+                        var c = canvas.getContext('2d');
+                        var w = canvas.width;
+                        var h = canvas.height;
+                        c.strokeStyle = '#000';
+                        c.lineWidth = 1;
+                        c.textAlign = 'center';
+                        var tw = w / this.width;
+                        var th = h / this.height;
+
+                        this.iterateTiles(function (x, y, tile) {
+                            c.strokeRect(x * tw, y * th, w, h);
+                            if (tile.player > 0) {
+                                c.strokeText(tile.adjacency, x * tw + (tw / 2), y * th + (th / 2));
+                            }
+                        });
+                    };
+
+                    Game.renderPlayersFunc = function() {
+                        var player, p = $('#playerlist');
+                        
+                        p.empty();
+                        for (player in this.players) {
+                            p.append('<li>'+this.players[player].name+'</li>');
+                        }
+                    };
+
+                    //Here we deal with canvas input.
+                    canvas.addEventListener("click", function(e) {
+                        var xcoord = Math.floor((e.clientX - canvas.offsetLeft) / (canvas.width/Game.width));
+                        var ycoord = Math.floor((e.clientY - canvas.offsetTop) / (canvas.height/Game.height));
+                        Net.SendClick(xcoord,ycoord,Game);
+                    }, false);
+                    setTimeout("Net.Refresh(Game);",400);
+                    Game.RenderGame();
+                }
+            };
+            #end raw
         </script>
     </head>
-    <body onload="StartGame();">
+    <body onload="Page.Start();">
         <h1>$title</h1>
         <h2>$game.name</h2>
         <canvas id ="Canvas" width ="$($game.board.width*40)" height="$($game.board.height*40)">
             You need a HTML5-capable browser to play this game.
         </canvas>
        <h3>Players</h3>
-       <ul>
-       #for $player in $players
-       <li>$player.name</li>
-       #end for
+       <ul id="playerlist">
        </ul>
     </body>
 </html>

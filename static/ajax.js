@@ -6,60 +6,97 @@ function isInt(x) {
     } 
     return x === y && x.toString() === y.toString(); 
 }
- 
-function ProcessData(xmlhttp, board, poll) {
-    var str = xmlhttp.responseText;
-    JSON.parse(str, function (key, data) {
-        if (key === "reveal") {
-            while (data !== "") {
-                var x = parseInt(data[0], 10);
-                var y = parseInt(data[1], 10);
-                var p = data[2];
-                var adj = parseInt(data[3], 10);
-                var t = board.getTile(x, y);
-                t.adjacency = adj;
-                t.player = p;
-                data = data.substr(4);
 
+Net = new function() {
+
+    /*
+     * Process received data. Call poll(game) when this is done.
+     */
+    var ProcessData = function (xmlhttp, game, poll) {
+        var str = xmlhttp.responseText;
+        var obj = JSON.parse(str);
+        var data;
+        if (obj.reveal)
+        {
+            data = obj.reveal;
+            var t;
+
+            for (t in data){
+                var x = parseInt(data[t].x,10);
+                var y = parseInt(data[t].y,10);
+                var p = data[t].pl;
+                var adj = data[t].val;
+                var tile = game.getTile(x, y);
+                //alert(x+","+y);
+                tile.adjacency = adj;
+                tile.player = p;
             }
-        }        
-    });
-    
-    if (poll) {
-        poll(board);
-    }
-    
-    return true;
-}
 
-function Poll(board) {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            ProcessData(xmlhttp, board, Poll);
+            //Render is defined in game.html.
+            game.RenderGame();
         }
-    };
-    xmlhttp.open("GET", "?action=poll", true);
-    xmlhttp.send();
-}
+        if (obj.players)
+        {
+            data = obj.players;
+            var p;
+            var plist = new Array();
 
-function Refresh(board) {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            ProcessData(xmlhttp, board, Poll);
+            for (p in data) {
+                var po = {};
+                po.name = data[p].name;
+                po.index = p+1;
+                plist.push(po);
+            }
+            game.players = plist;
+            game.RenderPlayers();
         }
-    };
-    xmlhttp.open("GET", "?action=refresh", true);
-    xmlhttp.send();    
-}
+        if (poll) {
+            poll(game);
+        }
 
-function SendClick(x, y, board) {
-    var xmlhttp = new XMLHttpRequest();
-    if (!isInt(x) || !isInt(y)) {
-        throw "Click coordinates must be integers.";
+        return true;
     }
-    
-    xmlhttp.open("GET", "?action=click&x=" + x + "&y=" + y, true);
-    xmlhttp.send();
-}
+
+    var SendRequest = function (game, method, string, reply, poll) {
+        var xmlhttp = new XMLHttpRequest();
+        if (reply){
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                    if (poll) {
+                        ProcessData(xmlhttp, game, Net.Poll);
+                    }
+                    else {
+                        ProcessData(xmlhttp, game, null);
+                    }
+                }
+            };
+        }
+        xmlhttp.open(method, string, true);
+        xmlhttp.send();
+    }
+
+    /*
+     * Send a poll request.
+     */
+    this.Poll = function(game) {
+        SendRequest(game,"GET", "?action=poll", true, true);
+    }
+
+    /*
+     * Send a refresh request.
+     */
+    this.Refresh = function(game) {
+        SendRequest(game,"GET", "?action=refresh",true, true);
+    }
+
+    /*
+     * Send a click message.
+     */
+    this.SendClick = function (x, y, game) {
+        var xmlhttp = new XMLHttpRequest();
+        if (!isInt(x) || !isInt(y)) {
+            throw "Click coordinates must be integers.";
+        }
+        SendRequest(game,"GET","?action=click&x=" + x + "&y=" + y,false,false);
+    }
+};

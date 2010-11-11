@@ -4,14 +4,25 @@ function Tile() {
     this.adjacency = 0;
 }
 
-function Board(w, h) {
-    this.width = w;
-    this.height = h;
-    this.data = new Array(w * h);
-    this.canvas = null;
-    var i;
-    for (i = 0; i < w * h; i = i + 1) {
-        this.data[i] = new Tile();
+/*
+ * Game namespace/object. Keeps a representation of all of the game data.
+ */
+Game = new function() {
+
+    this.Init = function(w, h) {
+        var i;
+        this.width = w;
+        this.height = h;
+        this.data = new Array(w * h);
+        this.players = {};
+
+        //Set these callbacks to draw the game.
+        this.renderGameFunc = function () {};
+        this.renderPlayersFunc = function() {};
+
+        for (i = 0; i < w * h; i = i + 1) {
+            this.data[i] = new Tile();
+        }
     }
 
     this.getTile = function (x, y) {
@@ -20,7 +31,11 @@ function Board(w, h) {
         }
         return this.data[x + y * this.width];
     };
-    
+
+    /*
+     * iterateTiles( function (x, y, tile) );
+     * Iterates over every tile, calling this function once for each one.
+     */
     this.iterateTiles = function (callback) {
         var xx;
         var yy;
@@ -30,28 +45,11 @@ function Board(w, h) {
             }
         }
     };
-    
-    this.renderToCanvas = function (canvas) {
-        if (canvas === null) {
-            canvas = this.canvas;
-        }
-        this.canvas = canvas;
-        canvas.width = canvas.width;
-        var c = canvas.getContext('2d');
-        var w = canvas.width;
-        var h = canvas.height;
-        c.strokeStyle = '#000';
-        c.lineWidth = 1;
-        c.textAlign = 'center';
-        var tw = w / this.width;
-        var th = h / this.height;
-        this.iterateTiles(function (x, y, tile) {
-            c.strokeRect(x * tw, y * th, w, h);
-            if (tile.player > 0) {
-                c.strokeText(tile.adjacency, x * tw + (tw / 2), y * th + (th / 2));
-            }
-        });
-    };
 
-    return true;
-}
+    this.RenderGame = function () {
+        this.renderGameFunc();
+    }
+    this.RenderPlayers = function() {
+        this.renderPlayersFunc();
+    }
+};

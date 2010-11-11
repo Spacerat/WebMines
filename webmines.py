@@ -72,15 +72,20 @@ class GameHandler(Site):
     
     def encodetiles(self,tilelist):
         if not tilelist: return ''
-        r=''
+        r=[]
         for t in tilelist:
+            if not t.uncovered: continue
             #The browser swaps the X and Y values, it seems.
-            r+="%d%d%d"%(t.pos[1],t.pos[0],t.uncovered)
+            r.append({
+                'x':t.pos[1],
+                'y':t.pos[0],
+                'pl':t.uncovered
+            })
             if t.bomb:
-                r+="X"
+                r[-1]['val']="X"
             else:
-                r+=str(t.adjacency)
-        return r        
+                r[-1]['val']=t.adjacency
+        return r
     
     def clickresponse(self,game,player,x,y):
         return self.encodetiles(game.click(player,x,y))
@@ -108,7 +113,7 @@ class GameHandler(Site):
             for row in game.board.tiles:
                 l+=row
             data = self.encodetiles(l)
-            if data: return json.dumps({'reveal':data,'players': [{'name':p.name} for p in game.players]})
+            response = json.dumps({'reveal':data,'players': [{'name':p.name} for p in game.players]})
             
         elif action=='poll':
             pollid=0
@@ -129,9 +134,9 @@ class GameHandler(Site):
             
         elif action=='':
             data = {
-                'title':website_title,
-                'game':game,
-                'player':player,
+                'title': website_title,
+                'game': game,
+                'player': player,
                 'players': game.players,
                 'playing': player.id in game.players
             }
