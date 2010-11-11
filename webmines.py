@@ -87,7 +87,7 @@ class GameHandler(Site):
     
     def send_data(self,data):
         for p in GameHandler.polls:
-            GameHandler.polls[p] = data       
+            GameHandler.polls[p].append(data)
     
     @cherrypy.expose
     def default(self,*args,**kwargs):
@@ -101,26 +101,30 @@ class GameHandler(Site):
             raise Exception, "Invalid game ID"
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
-            if data: self.send_data(json.dumps({'reveal':data}))
+            if data: self.send_data({'reveal':data})
             
         elif action=='refresh':
             l = []
             for row in game.board.tiles:
                 l+=row
             data = self.encodetiles(l)
-            if data: return json.dumps({'reveal':data})
+            if data: return json.dumps({'reveal':data,'players': [{'name':p.name} for p in game.players]})
             
         elif action=='poll':
             pollid=0
             #Add a poll request to the poll list
             while pollid==0 or pollid in GameHandler.polls.keys():
                 pollid = randint(0,10000)
-            GameHandler.polls[pollid] = '{}'
+            GameHandler.polls[pollid] = []
             #wait until the request is filled
             cherrypy.session.save()
-            while GameHandler.polls[pollid]=='{}':
+
+            responsedict = {}
+            while len(GameHandler.polls[pollid])==0:
                 time.sleep(0.1)
-            response = GameHandler.polls[pollid]
+            while len(GameHandler.polls[pollid])>0:
+                responsedict.update(GameHandler.polls[pollid].pop(0))
+            response = json.dumps(responsedict)
             del GameHandler.polls[pollid]
             
         elif action=='':
@@ -131,10 +135,12 @@ class GameHandler(Site):
                 'players': game.players,
                 'playing': player.id in game.players
             }
+            self.send_data({
+                'players': [{'name':p.name} for p in game.players]
+            })
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()
 
-        
         return response
         
 class InputThread(threading.Thread):
