@@ -13,10 +13,14 @@ website_title = 'MultiMines'
 
 class Site():
     def get_session_player(self,game,name=''):
+        if name=="":
+            name = cherrypy.request.cookie.get('name','').value
         id = cherrypy.session.get(game.id)
         if id==None and name!='':
             p = game.add_player(name)
             cherrypy.session[game.id] = p.id
+            cherrypy.response.cookie['name'] = name
+            cherrypy.response.cookie['name']['expires'] = 60*60*24
             return p
         else:
             return game.get_player(id)
@@ -30,6 +34,7 @@ class RootHandler(Site):
             'title':website_title,
             'games':Game.games.values(),
             'numgames':len(Game.games.values()),
+            'name': cherrypy.request.cookie.get('name','').value
         }
         t = Template(file='html/index.html',searchList=[data])
         return t.respond()
@@ -77,6 +82,13 @@ class GameHandler(Site):
             else:
                 r[-1]['val']=t.adjacency
         return r
+
+    def encode_playerlist(self,game):
+        return [{
+            'name':p.name,
+            'present':p.present,
+            'id':p.id
+        } for p in game.players]
     
     def clickresponse(self,game,player,x,y):
         return self.encodetiles(game.click(player,x,y))
@@ -93,7 +105,7 @@ class GameHandler(Site):
         if id in Game.games:
             game = Game.games[id]
         else:
-            raise Exception, "Invalid game ID"
+            raise cherrypy.NotFound
         player = self.get_session_player(game)
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
@@ -103,7 +115,7 @@ class GameHandler(Site):
             for row in game.board.tiles:
                 l+=row
             data = self.encodetiles(l)
-            response = json.dumps({'reveal':data,'players': [{'name':p.name} for p in game.players]})
+            response = json.dumps({'reveal':data,'players': self.encode_playerlist(game)})
             
         elif action=='poll':
             pollid=0
@@ -115,14 +127,26 @@ class GameHandler(Site):
             cherrypy.session.save()
 
             responsedict = {}
+            count = 0
             while len(GameHandler.polls[pollid])==0:
                 time.sleep(0.1)
+                count+=0.1
+                if count>300:
+                    #Timeout!
+                    print "Playe %s timed out!"%player.name
+                    player.present = False
+                    self.send_data({'players': self.encode_playerlist(game)})
+                    game.check_activity()
+                    break
+
+                    
             while len(GameHandler.polls[pollid])>0:
                 responsedict.update(GameHandler.polls[pollid].pop(0))
             response = json.dumps(responsedict)
             del GameHandler.polls[pollid]
             
         elif action=='':
+            player.present = True
             data = {
                 'title': website_title,
                 'game': game,
@@ -131,7 +155,7 @@ class GameHandler(Site):
                 'playing': player.id in game.players
             }
             self.send_data({
-                'players': [{'name':p.name} for p in game.players]
+                'players': self.encode_playerlist(game)
             })
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()

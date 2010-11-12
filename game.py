@@ -24,6 +24,7 @@ class Player():
     def __init__(self,name,id):
         self.name = name
         self.id = id
+        self.present = True
 
 class Game():
     
@@ -66,7 +67,13 @@ class Game():
             t.uncovered = player.id
             return [t]
         return self.board.reveal(player.id,x,y)
-        
+
+    def check_activity(self):
+        if not True in [p.present for p in self.players]:
+            self.close()
+            return False
+        return True
+
     def close(self):
         del Game.games[self.id]
 

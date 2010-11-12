@@ -44,7 +44,8 @@ Net = new function() {
             for (p in data) {
                 var po = {};
                 po.name = data[p].name;
-                po.index = p+1;
+                po.present = data[p].present;
+                po.index = data[p].id;
                 plist.push(po);
             }
             game.players = plist;
@@ -68,6 +69,10 @@ Net = new function() {
                     else {
                         ProcessData(xmlhttp, game, null);
                     }
+                }
+                else if (xmlhttp.status === 404) {
+                    //The game no longer exists
+                    alert("The game has timed out.");
                 }
             };
         }
