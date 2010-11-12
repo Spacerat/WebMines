@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="static/logic.js"></script>
         <script type="text/javascript" src="static/ajax.js"></script>
-        <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
+        <!--<script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>-->
         <title>$title game: $game.name</title>
         <script type="text/javascript">
 
@@ -54,11 +54,11 @@
                     };
 
                     Game.renderPlayersFunc = function() {
-                        var player, p = $('#playerlist');
+                        var player, p = document.getElementById('playerlist');
                         
-                        p.empty();
+                        p.innerHTML='';
                         for (player in this.players) {
-                            p.append('<li>'+this.players[player].name+'</li>');
+                            p.innerHTML+='<li>'+this.players[player].name+"|"+this.players[player].present+'</li>';
                         }
                     };
 
@@ -80,6 +80,7 @@
     </head>
     <body onload="Page.Start();">
         <h1>$title</h1>
+        <a href ="../">Go back</a>
         <h2>$game.name</h2>
         <canvas id ="Canvas" width ="$($game.board.width*40)" height="$($game.board.height*40)">
             You need a HTML5-capable browser to play this game.
