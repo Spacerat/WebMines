@@ -14,7 +14,7 @@ website_title = 'MultiMines'
 class Site():
     def get_session_player(self,game,name=''):
         if name=="":
-            name = cherrypy.request.cookie.get('name','').value
+            name = self.get_cookie_name()
         id = cherrypy.session.get(game.id)
         if id==None and name!='':
             p = game.add_player(name)
@@ -25,6 +25,12 @@ class Site():
         else:
             return game.get_player(id)
 
+    def get_cookie_name(self):
+        try:
+            return cherrypy.request.cookie.get('name','').value
+        except AttributeError:
+            return ''
+
 
 class RootHandler(Site):
     
@@ -34,7 +40,7 @@ class RootHandler(Site):
             'title':website_title,
             'games':Game.games.values(),
             'numgames':len(Game.games.values()),
-            'name': cherrypy.request.cookie.get('name','').value
+            'name': self.get_cookie_name()
         }
         t = Template(file='html/index.html',searchList=[data])
         return t.respond()
