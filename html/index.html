@@ -6,27 +6,34 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link type="text/css" rel="stylesheet" href="static/site.css" />
         <title>$title</title>
     </head>
     <body>
-        <h1>$title</h1>
-        <h2>Join game</h2>
-        <form method="get" action="join" name="join">
+        <div class="container_header">
+            <h1>$title</h1>
+        </div>
+        <div class="container_main">
+            <h2>Join game</h2>
+            <form method="get" action="join" name="join">
+                $playerbox
+                <select name="id" size="$numgames">
+                    #for $game in $games
+                    <option value="$game.id">$game.name</option>
+                    #end for
+                </select>
+                <input type="submit" value="Join"/>
+            </form>
+            <br />
+            <h2>Create game</h2>
+            <form method="post" action="create" name="create">
             $playerbox
-            <select name="id" size="$numgames">
-                #for $game in $games
-                <option value="$game.id">$game.name</option>
-                #end for
-            </select>
-            <input type="submit" value="Join"/>
-        </form>
-        <h2>Create game</h2>
-        <form method="post" action="create" name="create">
-        $playerbox
-        Game name: <input type="text" name="name" />
-        
-        <input type="submit" value="Create"/>
-        </form>
+            Game name: <input type="text" name="name" />
+
+            <input type="submit" value="Create"/>
+            </form>
+        </div>
+
         
     </body>
 </html>
