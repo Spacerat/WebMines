@@ -1,0 +1,17 @@
+
+.tile {
+    width: 1.3em;
+    height: 1.3em;
+    text-align: center;
+    font-family: Ariel, sans-serif;
+    font-weight: bold;
+    font-size: larger;
+    border-color: black;
+    border-width: medium;
+    border-style: solid;
+    border-style: groove;
+}
+
+#grid {
+    border-collapse: collapse;
+}

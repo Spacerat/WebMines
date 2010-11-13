@@ -1,0 +1,37 @@
+
+
+body {
+    font-family: sans-serif;
+    background-color: #cccccc;
+    display: block;
+}
+
+.container_main {
+    margin-left: 10%;
+    margin-right: 10%;
+    background-color: white;
+    border-left: black medium solid;
+    border-right: black medium solid;
+    border-bottom: black medium solid;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 20px;
+}
+
+.container_header {
+    margin-left: 10%;
+    margin-right: 10%;
+    background-color: #ccccff;
+    border: black medium solid;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+h1 {
+    margin: 0;
+    padding: 0 0.4em;
+}
+
+h2 {
+    margin-top: 0;
+}
