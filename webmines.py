@@ -9,7 +9,7 @@ from Cheetah.Template import Template
 from game import Game
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-website_title = 'MultiMines'
+website_title = 'AjaxMines'
 
 class Site():
     def get_session_player(self,game,name=''):
@@ -44,12 +44,19 @@ class RootHandler(Site):
         }
         t = Template(file='html/index.html',searchList=[data])
         return t.respond()
-    
+
     @cherrypy.expose
-    def create(self,name="",pname=""):
+    def create(self,name="",pname="",width=-1,height=-1,mines=-1,defaultmines=1):
+        if defaultmines=='true':
+            mines=-1
+        
+        width = int(width)
+        height = int(height)
+        mines = int(mines)
+
         if not name:
             return "You must supply a game name."
-        newgame = Game(name)
+        newgame = Game(name,width,height,mines)
         pl = self.get_session_player(newgame,name=pname)
         if not pl:
             return "Please supply a player name."
@@ -76,12 +83,13 @@ class GameHandler(Site):
         if not tilelist: return ''
         r=[]
         for t in tilelist:
-            if not t.uncovered: continue
+            if (not t.uncovered) and (not t.flag): continue
             #The browser swaps the X and Y values, it seems.
             r.append({
-                'x':t.pos[1],
-                'y':t.pos[0],
-                'pl':t.uncovered
+                'x': t.pos[1],
+                'y': t.pos[0],
+                'pl': t.uncovered,
+                'fl': t.flag
             })
             if t.bomb:
                 r[-1]['val']="X"
@@ -119,6 +127,17 @@ class GameHandler(Site):
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
             if data: self.send_data({'reveal':data})
+        if action=='flag':
+            x = int(kwargs['x'])
+            y = int(kwargs['y'])
+            data = game.flag(player,x,y )
+            print "data",data
+            self.send_data({'flag': {
+                'x': x,
+                'y': y,
+                'fl': data
+            }})
+
         elif action=='refresh':
             l = []
             for row in game.board.tiles:

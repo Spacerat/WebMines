@@ -26,10 +26,13 @@ Net = new function() {
                 var y = parseInt(data[t].y,10);
                 var p = data[t].pl;
                 var adj = data[t].val;
+                var flag = data[t].fl
                 var tile = game.getTile(x, y);
+
                 //alert(x+","+y);
                 tile.adjacency = adj;
                 tile.player = p;
+                tile.flag = flag;
                 tile.onModify();
             }
 
@@ -51,6 +54,18 @@ Net = new function() {
             }
             game.players = plist;
             game.RenderPlayers();
+        }
+        if (obj.flag)
+        {
+            var x,y,flag,tile;
+            x = obj.flag.x
+            y = obj.flag.y
+            flag = obj.flag.fl
+            tile = game.getTile(x,y);
+            tile.flag = flag;
+            tile.onModify();
+            
+            game.RenderGame();
         }
         if (poll) {
             poll(game);
@@ -100,11 +115,16 @@ Net = new function() {
     /*
      * Send a click message.
      */
-    this.SendClick = function (x, y, game) {
+    this.SendClick = function (x, y, flag) {
         var xmlhttp = new XMLHttpRequest();
         if (!isInt(x) || !isInt(y)) {
             throw "Click coordinates must be integers.";
         }
-        SendRequest(game,"GET","?action=click&x=" + x + "&y=" + y,false,false);
+        if (flag) {
+            SendRequest(null,"GET","?action=flag&x=" + x + "&y=" + y,false,false);
+        }
+        else {
+            SendRequest(null,"GET","?action=click&x=" + x + "&y=" + y,false,false);
+        }
     }
 };

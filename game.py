@@ -30,7 +30,11 @@ class Game():
     
     games={}
     
-    def __init__(self,name,width=18,height=16,mines=-1,wrap=False):
+    def __init__(self,name,width=-1,height=-1,mines=-1,wrap=False):
+        if width<0: width=18
+        if height<0: height=16
+        if mines<0: mines=-1
+
         for g in Game.games.values():
             if g.name == name:
                 raise GameNameTakenError, "Game name already taken."
@@ -62,11 +66,16 @@ class Game():
         return self.players[id-1]
 
     def click(self,player,x,y):
+        if self.board.get_flag(x,y)==player.id:
+            return
         if self.board.is_bomb(x,y):
             t = self.board.get_tile(x,y)
             t.uncovered = player.id
             return [t]
         return self.board.reveal(player.id,x,y)
+
+    def flag(self,player,x,y):
+        return self.board.flag(player.id,x,y)
 
     def check_activity(self):
         if not True in [p.present for p in self.players]:
@@ -155,7 +164,21 @@ class Board:
         for x in self.get_adjacent_tiles(x,y):
             x.adjacency+=1
         return True
-    
+
+    #Attempt to flag a tile, return its new (or unchanged) flag id.
+    def flag(self,id,x,y):
+        t = self.get_tile(x,y)
+        if t.uncovered>0:
+            return t.flag
+        if t.flag==0:
+            t.flag=id
+        elif t.flag==id:
+            t.flag=0
+        return t.flag
+
+    def get_flag(self,x,y):
+        return self.get_tile(x,y).flag
+
     #Check if there is a bomb at the given coordinate
     def is_bomb(self,x,y):
         t = self.get_tile(x,y)
@@ -165,6 +188,8 @@ class Board:
     
     #Return a list of revealed tiles
     def reveal(self,player,x,y):
+        t = self.get_tile(x,y)
+        if t.flag == player: return
         ret = self._recurse_reveal(player, x, y)
         for l in self.tiles:
             for t in l:

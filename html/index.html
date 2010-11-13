@@ -1,35 +1,78 @@
 <!DOCTYPE HTML>
-#def playerbox
-    Player name: <input type="text" name="pname" value="$name"/><br />
-#end def
 
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link type="text/css" rel="stylesheet" href="static/site.css" />
         <title>$title</title>
+        <script type="text/javascript">
+            /*
+             * The player name textbox is not in a form, so this is required to update the forms.
+             */
+            function updatePlayerName(newname) {
+                var h = document.getElementsByName('pname');
+                var elem;
+                for (elem in h) {
+                    h[elem].value = newname;
+                }
+            }
+
+            function defMinesChanged(newvalue) {
+                if (newvalue===false) {
+                    document.create.mines.disabled = false;
+                }
+                else {
+                    document.create.mines.disabled = true;
+                }
+            }
+        </script>
     </head>
     <body>
         <div class="container_header">
             <h1>$title</h1>
         </div>
         <div class="container_main">
+            
+            <label for="name">Player name:</label>
+            <input type="text" value="$name" onChange="updatePlayerName(this.value);"/><br />
+
             <h2>Join game</h2>
             <form method="get" action="join" name="join">
-                $playerbox
-                <select name="id" size="$numgames">
+                <input type="hidden" name="pname" value="$name" />
+                <label for="id">Select game:</label>
+                <select name="id" size="$numgames" class="gamebox">
                     #for $game in $games
                     <option value="$game.id">$game.name</option>
                     #end for
-                </select>
+                </select><br />
                 <input type="submit" value="Join"/>
             </form>
             <br />
             <h2>Create game</h2>
             <form method="post" action="create" name="create">
-            $playerbox
-            Game name: <input type="text" name="name" />
-
+                <input type="hidden" name="pname" value="$name" />
+                <menu>
+                    <li>
+                    <label for="name">Game name:</label>
+                    <input type="text" name="name" />
+                    </li>
+                    <li>
+                    <label for="width">Width:</label>
+                    <input type="number" name="width" min="5" max="40" value="16"/>
+                    </li>
+                    <li>
+                    <label for="height">Height:</label>
+                    <input type="number" name="height" min="5" max="35" value="16"/>
+                    </li>
+                    <li>
+                    <label for="defaultmines">Default mines:</label>
+                    <input type="checkbox" value="true" name="defaultmines" onChange="defMinesChanged(this.checked);" checked />
+                    </li>
+                    <li>
+                    <label for="mines">Mines:</label>
+                    <input type="number" name="mines" min="3" max="1000" value="40" disabled />
+                    </li>
+                </menu>
             <input type="submit" value="Create"/>
             </form>
         </div>

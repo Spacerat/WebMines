@@ -18,7 +18,7 @@
 
 
                 this.getCol = function (plid) {
-                    return (['#f44', '#4f4', '#44f','#ff4','#f4f','#4ff'])[plid - 1];
+                    return (['#fff','#f44', '#4f4', '#44f','#ff4','#f4f','#4ff'])[plid];
                 }
 
                 this.Start = function () {
@@ -46,12 +46,32 @@
                         //Send the tile to the server when it is clicked
                         $(this).mousedown( function(e) {
                             if (tile.player===0){
-                                Net.SendClick(x, y);
+                                if (e.which===1) {
+                                    Net.SendClick(x, y);
+                                }
+                                else if (e.which===3) {
+                                    Net.SendClick(x,y,true);
+                                }
                             }
                         });
                         //Appropriately modifiy tiles when the server sends back the results.
                         tile.onModify = function() {
-                            cell.innerHTML = this.adjacency;
+                            if (!this.adjacency && this.flag)
+                            {
+                                cell.innerHTML = 'F';
+                            }
+                            else if (this.adjacency) {
+                                cell.innerHTML = this.adjacency;
+                            }
+                            else {
+                                cell.innerHTML = '';
+                            }
+                            if (this.flag && this.player===0){
+                                $(cell).css('color',Page.getCol(this.flag));
+                            }
+                            else {
+                                $(cell).css('color','black');
+                            }
                             $(cell).css('background-color', Page.getCol(this.player));
                         };
                     });
@@ -72,8 +92,13 @@
                         }
                     };
 
-
-                    setTimeout("Net.Refresh(Game);",400);
+                    //Chrome doesn't seem to like sending a request straight away.
+                    if (/chrome/.test(navigator.userAgent.toLowerCase())){
+                        setTimeout("Net.Refresh(Game);",400);
+                    }
+                    else {
+                        Net.Refresh(Game);
+                    }
                     Game.RenderGame();
                 }
             };

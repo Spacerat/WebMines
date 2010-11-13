@@ -2,6 +2,7 @@
 function Tile() {
     this.player = 0;
     this.adjacency = 0;
+    this.flag = 0;
     
     //An alternative to renderGameFunc!
     this.onModify = function () {};

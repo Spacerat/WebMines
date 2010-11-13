@@ -6,6 +6,10 @@ body {
     display: block;
 }
 
+.gamebox {
+    min-width: 10em;
+}
+
 .container_main {
     margin-left: 10%;
     margin-right: 10%;
@@ -34,4 +38,10 @@ h1 {
 
 h2 {
     margin-top: 0;
+}
+
+label {
+    display: inline-block;
+    width: 7em;
+    margin-bottom: 10px;
 }
