@@ -30,6 +30,7 @@ Net = new function() {
                 //alert(x+","+y);
                 tile.adjacency = adj;
                 tile.player = p;
+                tile.onModify();
             }
 
             //Render is defined in game.html.
@@ -70,10 +71,12 @@ Net = new function() {
                         ProcessData(xmlhttp, game, null);
                     }
                 }
+                /*
                 else if (xmlhttp.status === 404) {
                     //The game no longer exists
                     alert("The game has timed out.");
                 }
+                */
             };
         }
         xmlhttp.open(method, string, true);
