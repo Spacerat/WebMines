@@ -22,7 +22,7 @@ class Site():
             cherrypy.response.cookie['name'] = name
             cherrypy.response.cookie['name']['expires'] = 60*60*24
             return p
-        else:
+        elif id:
             return game.get_player(id)
 
     def get_cookie_name(self):
@@ -89,11 +89,12 @@ class GameHandler(Site):
                 r[-1]['val']=t.adjacency
         return r
 
-    def encode_playerlist(self,game):
+    def encode_playerlist(self,game,this_player):
         return [{
             'name':p.name,
             'present':p.present,
-            'id':p.id
+            'id':p.id,
+            'me':(p==this_player)
         } for p in game.players]
     
     def clickresponse(self,game,player,x,y):
@@ -113,6 +114,8 @@ class GameHandler(Site):
         else:
             raise cherrypy.NotFound
         player = self.get_session_player(game)
+        if player==None:
+            player = self.get_session_player(game,"Guest")
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
             if data: self.send_data({'reveal':data})
@@ -121,7 +124,7 @@ class GameHandler(Site):
             for row in game.board.tiles:
                 l+=row
             data = self.encodetiles(l)
-            response = json.dumps({'reveal':data,'players': self.encode_playerlist(game)})
+            response = json.dumps({'reveal':data,'players': self.encode_playerlist(game,player)})
             
         elif action=='poll':
             pollid=0
@@ -133,18 +136,8 @@ class GameHandler(Site):
             cherrypy.session.save()
 
             responsedict = {}
-            count = 0
             while len(GameHandler.polls[pollid])==0:
                 time.sleep(0.1)
-                count+=0.1
-                if count>300:
-                    #Timeout!
-                    print "Playe %s timed out!"%player.name
-                    player.present = False
-                    self.send_data({'players': self.encode_playerlist(game)})
-                    game.check_activity()
-                    break
-
                     
             while len(GameHandler.polls[pollid])>0:
                 responsedict.update(GameHandler.polls[pollid].pop(0))
@@ -161,7 +154,7 @@ class GameHandler(Site):
                 'playing': player.id in game.players
             }
             self.send_data({
-                'players': self.encode_playerlist(game)
+                'players': self.encode_playerlist(game,player)
             })
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()
