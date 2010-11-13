@@ -2,91 +2,110 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link type="text/css" rel="stylesheet" href="static/gamegrid.css" />
+        <link type="text/css" rel="stylesheet" href="static/site.css" />
         <script type="text/javascript" src="static/logic.js"></script>
         <script type="text/javascript" src="static/ajax.js"></script>
-        <!--<script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>-->
+        
+
+        <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
         <title>$title game: $game.name</title>
         <script type="text/javascript">
 
-             Page = new function () {
+          
 
-                this.Start = function() {
+            Page = new function () {
+
+
+                this.getCol = function (plid) {
+                    return (['#f44', '#4f4', '#44f','#ff4','#f4f','#4ff'])[plid - 1];
+                }
+
+                this.Start = function () {
+
+   
+
                     /*
                      * The Game is a global object (there only needs to be one).
                      * However, in order to avoid reliance on this fact, it is often
                      * still passed around in functions, for example, Net.Refresh(game).
                      */
-                    Game.Init($game.board.width,$game.board.height);
+                    Game.Init($game.board.width, $game.board.height);
                     #raw
-                    var canvas = document.getElementById("Canvas");
 
-                    //Here we define how the game is rendered
-                    //notice that 'this' is an instance of Game.
-                    Game.renderGameFunc = function() {
-                        canvas.width = canvas.width;
-                        var c = canvas.getContext('2d');
-                        var w = canvas.width;
-                        var h = canvas.height;
-                        c.strokeStyle = '#000';
-                        c.lineWidth = 1;
-                        c.textAlign = 'center';
-                        var tw = w / this.width;
-                        var th = h / this.height;
+                    //Disable the right-click context menu inside the grid.
+                    $('#grid').bind("contextmenu",function(e){
+                       return false;
+                    });
 
-                        this.iterateTiles(function (x, y, tile) {
-                            c.strokeStyle = '#000';
-                            c.strokeRect(x * tw, y * th, tw, th);
-                            if (tile.player > 0) {
-                                c.fillStyle = (['#00f','#f00','#0f0','#ff0','#f0f','#0ff'])[tile.player];
-                                c.fillRect(x*tw, y*th, tw,th);
-                                if (tile.adjacency==='X') {
-                                    c.fillStyle = '#000';
-                                    c.fillRect(x*tw+tw/6, y*th+th/6,tw*(4/6),th*(4/6));
-                                    c.strokeStyle = '#fff';
-                                }
-                                else {
-                                    c.strokeStyle = '#000';
-                                }
-                                c.strokeText(tile.adjacency, x * tw + (tw / 2), y * th + (th / 2));
-                                c.fillStyle = '#fff';
+                    $(".tile").each( function(index) {
+                        var cords = this.id.split(",");
+                        var x = parseInt(cords[0], 10), y = parseInt(cords[1], 0);
+                        var tile = Game.getTile(x, y);
+                        var cell = this;
+                        //Send the tile to the server when it is clicked
+                        $(this).mousedown( function(e) {
+                            if (tile.player===0){
+                                Net.SendClick(x, y);
                             }
                         });
-                    };
+                        //Appropriately modifiy tiles when the server sends back the results.
+                        tile.onModify = function() {
+                            cell.innerHTML = this.adjacency;
+                            $(cell).css('background-color', Page.getCol(this.player));
+                        };
+                    });
+                    
+                    //Here we define how the game is rendered
+                    //notice that 'this' is an instance of Game.
 
                     Game.renderPlayersFunc = function() {
                         var player, p = document.getElementById('playerlist');
-                        
+
                         p.innerHTML='';
                         for (player in this.players) {
-                            p.innerHTML+='<li>'+this.players[player].name+"|"+this.players[player].present+'</li>';
+                            p.innerHTML+='<li>'+this.players[player].name
+                            if (!this.players[player].present) {
+                                p.innerHTML+=" (left)";
+                            }
+                            p.innerHTML+='</li>';
                         }
                     };
 
-                    //Here we deal with canvas input.
-                    canvas.addEventListener("click", function(e) {
-                        var xcoord = Math.floor((e.clientX - canvas.offsetLeft) / (canvas.width/Game.width));
-                        var ycoord = Math.floor((e.clientY - canvas.offsetTop) / (canvas.height/Game.height));
-                        if (Game.getTile(xcoord,ycoord).player===0){
-                            Net.SendClick(xcoord,ycoord,Game);
-                        }
 
-                    }, false);
                     setTimeout("Net.Refresh(Game);",400);
                     Game.RenderGame();
                 }
             };
+            
             #end raw
         </script>
     </head>
     <body onload="Page.Start();">
-        <h1>$title</h1>
+
+        <div class="container_header">
+            <h1>$title: $game.name</h1>
+        </div>
+        <div class="container_main">
         <a href ="../">Go back</a>
-        <h2>$game.name</h2>
-        <canvas id ="Canvas" width ="$($game.board.width*40)" height="$($game.board.height*40)">
-            You need a HTML5-capable browser to play this game.
-        </canvas>
-       <h3>Players</h3>
-       <ul id="playerlist">
-       </ul>
+
+            <table id="grid">
+                #for $row in $range($game.board.height)
+                    <tr>
+                    #for $cell in $range($game.board.width)
+                    <td class="tile" id="$cell,$row"></td>
+                    #end for
+                    </tr>
+                #end for
+
+            </table>
+
+            <div class="infobox" id="infobox">
+                <h3>Players</h3>
+                <ul id="playerlist">
+                </ul>
+            </div>
+        </div>
+
     </body>
 </html>
