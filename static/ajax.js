@@ -116,7 +116,6 @@ Net = new function() {
      * Send a click message.
      */
     this.SendClick = function (x, y, flag) {
-        var xmlhttp = new XMLHttpRequest();
         if (!isInt(x) || !isInt(y)) {
             throw "Click coordinates must be integers.";
         }
@@ -126,5 +125,10 @@ Net = new function() {
         else {
             SendRequest(null,"GET","?action=click&x=" + x + "&y=" + y,false,false);
         }
+    }
+
+    this.sendLeave = function () {
+        alert("leaving!")
+        SendRequest(null,"GET","?action=leave",false,false)
     }
 };
