@@ -1,3 +1,4 @@
+import game
 
 import cherrypy
 import os
@@ -76,9 +77,7 @@ class RootHandler(Site):
 
 
 class GameHandler(Site):
-    
-    polls = {}
-    
+        
     def encodetiles(self,tilelist):
         if not tilelist: return ''
         r=[]
@@ -88,13 +87,15 @@ class GameHandler(Site):
             r.append({
                 'x': t.pos[1],
                 'y': t.pos[0],
-                'pl': t.uncovered,
                 'fl': t.flag
             })
-            if t.bomb:
-                r[-1]['val']="X"
-            else:
-                r[-1]['val']=t.adjacency
+            if t.uncovered or t.flag:
+                r[-1]['pl']=t.uncovered
+                if t.uncovered:
+                    if t.bomb:
+                        r[-1]['val']="X"
+                    else:
+                        r[-1]['val']=t.adjacency
         return r
 
     def encode_playerlist(self,game,this_player):
@@ -108,9 +109,9 @@ class GameHandler(Site):
     def clickresponse(self,game,player,x,y):
         return self.encodetiles(game.click(player,x,y))
     
-    def send_data(self,data):
-        for p in GameHandler.polls:
-            GameHandler.polls[p].append(data)
+    def send_data(self,game,data):
+        for p in game.players:
+            p.send_data(data)
     
     @cherrypy.expose
     def default(self,*args,**kwargs):
@@ -122,17 +123,23 @@ class GameHandler(Site):
         else:
             raise cherrypy.NotFound
         player = self.get_session_player(game)
+
+        if game.closed:
+            raise cherrypy.NotFound
+
         if player==None:
             player = self.get_session_player(game,"Guest")
+
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
-            if data: self.send_data({'reveal':data})
-        if action=='flag':
+            if data: self.send_data(game,{'reveal':data})
+
+        elif action=='flag':
             x = int(kwargs['x'])
             y = int(kwargs['y'])
             data = game.flag(player,x,y )
             print "data",data
-            self.send_data({'flag': {
+            self.send_data(game,{'flag': {
                 'x': x,
                 'y': y,
                 'fl': data
@@ -146,23 +153,24 @@ class GameHandler(Site):
             response = json.dumps({'reveal':data,'players': self.encode_playerlist(game,player)})
             
         elif action=='poll':
-            pollid=0
-            #Add a poll request to the poll list
-            while pollid==0 or pollid in GameHandler.polls.keys():
-                pollid = randint(0,10000)
-            GameHandler.polls[pollid] = []
-            #wait until the request is filled
+            #Wait until the request is filled
             cherrypy.session.save()
+            while player.polldata==None:
+                time.sleep(0.1)
 
             responsedict = {}
-            while len(GameHandler.polls[pollid])==0:
-                time.sleep(0.1)
-                    
-            while len(GameHandler.polls[pollid])>0:
-                responsedict.update(GameHandler.polls[pollid].pop(0))
+            while len(player.polldata)>0:
+                responsedict.update(player.polldata.pop(0))
             response = json.dumps(responsedict)
-            del GameHandler.polls[pollid]
-            
+            player.polldata=None
+
+        elif action=='leave':
+            player.present = False
+            self.send_data(game, {
+                'players': self.encode_playerlist(game,player)
+            })
+            game.check_activity()
+
         elif action=='':
             player.present = True
             data = {
@@ -172,23 +180,15 @@ class GameHandler(Site):
                 'players': game.players,
                 'playing': player.id in game.players
             }
-            self.send_data({
+            self.send_data(game,{
                 'players': self.encode_playerlist(game,player)
             })
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()
 
-        print response
+        #print response
         return response
         
-class InputThread(threading.Thread):
-    def run(self):
-        go = True
-        while go:
-            cmd = raw_input(">")
-            if cmd=="exit":
-                go = False
-                cherrypy.engine.exit()
 
 if __name__ == "__main__":
     

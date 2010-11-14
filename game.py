@@ -26,6 +26,14 @@ class Player():
         self.id = id
         self.present = True
 
+        self.polldata = None
+
+    def send_data(self,data):
+        if self.polldata == None:
+            self.polldata = [data]
+        else:
+            self.polldata.append(data)
+
 class Game():
     
     games={}
@@ -38,7 +46,7 @@ class Game():
         for g in Game.games.values():
             if g.name == name:
                 raise GameNameTakenError, "Game name already taken."
-        
+        self.closed = False
         self.started = False
         self.name = name
         self.board = Board(width,height,mines,wrap)
@@ -84,6 +92,9 @@ class Game():
         return True
 
     def close(self):
+        for p in self.players:
+            p.send_data('')
+        self.closed = True
         del Game.games[self.id]
 
 
