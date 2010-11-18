@@ -47,20 +47,26 @@ class RootHandler(Site):
         return t.respond()
 
     @cherrypy.expose
-    def create(self,name="",pname="",width=-1,height=-1,mines=-1,defaultmines=1):
+    def create(self,name="",pname="",width=-1,height=-1,mines=-1,defaultmines=1,wrap=False):
         if defaultmines=='true':
             mines=-1
-        
+        if wrap=='true':
+            wrap=True
+        else:
+            wrap=False
+
         width = int(width)
         height = int(height)
         mines = int(mines)
 
+
         if not name:
             return "You must supply a game name."
-        newgame = Game(name,width,height,mines)
+        newgame = Game(name,width,height,mines,wrap)
         pl = self.get_session_player(newgame,name=pname)
         if not pl:
             return "Please supply a player name."
+            newgame.close()
         raise cherrypy.HTTPRedirect("/game/"+newgame.id)
 
     @cherrypy.expose
