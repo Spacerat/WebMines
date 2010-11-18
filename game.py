@@ -121,7 +121,7 @@ class Board:
         self.height=height
         self.bombs=bombs
         self.wrap=wrap
-        if bombs==-1: self.bombs =  int(((width*height)-9)/7)
+        if bombs==-1: self.bombs =  int(((width*height)-9)/7.0)
         if width*height-14<self.bombs:
             raise BoardTooManyBombsError, "%d bombs is too many. The largest allowed number of bombs is width*height-14 = %d"%(self.bombs,width*height-14)
         

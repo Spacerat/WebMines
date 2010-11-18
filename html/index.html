@@ -23,7 +23,16 @@
                 }
                 else {
                     document.create.mines.disabled = true;
+                    onGameSizeChange();
                 }
+            }
+            
+            function onGameSizeChange() {
+                var f = document.create;
+                if (f.defaultmines.checked == true) {
+                    f.mines.value = Math.floor(((f.width.value * f.height.value)-9)/7);
+                }
+                //int(((width*height)-9)/7)
             }
         </script>
     </head>
@@ -58,11 +67,11 @@
                     </li>
                     <li>
                     <label for="width">Width:</label>
-                    <input type="number" name="width" min="5" max="40" value="16"/>
+                    <input type="number" name="width" min="5" max="40" value="16" onChange="onGameSizeChange();"/>
                     </li>
                     <li>
                     <label for="height">Height:</label>
-                    <input type="number" name="height" min="5" max="35" value="16"/>
+                    <input type="number" name="height" min="5" max="35" value="16" onChange="onGameSizeChange();"/>
                     </li>
                     <li>
                     <label for="defaultmines">Default mines:</label>
@@ -71,6 +80,10 @@
                     <li>
                     <label for="mines">Mines:</label>
                     <input type="number" name="mines" min="3" max="1000" value="40" disabled />
+                    </li>
+                    <li>
+                    <label for="mines">Wrap minefield:</label>
+                    <input type="checkbox" value="true" name="wrap"/>
                     </li>
                 </menu>
             <input type="submit" value="Create"/>
