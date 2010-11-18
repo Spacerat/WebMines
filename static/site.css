@@ -11,8 +11,8 @@ body {
 }
 
 .container_main {
-    margin-left: 10%;
-    margin-right: 10%;
+    margin-left: 6%;
+    margin-right: 6%;
     background-color: white;
     border-left: black medium solid;
     border-right: black medium solid;
@@ -23,8 +23,8 @@ body {
 }
 
 .container_header {
-    margin-left: 10%;
-    margin-right: 10%;
+    margin-left: 6%;
+    margin-right: 6%;
     background-color: #ccccff;
     border: black medium solid;
     border-top-left-radius: 10px;
