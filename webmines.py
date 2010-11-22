@@ -59,14 +59,14 @@ class RootHandler(Site):
         height = int(height)
         mines = int(mines)
 
-
         if not name:
             return "You must supply a game name."
         newgame = Game(name,width,height,mines,wrap)
         pl = self.get_session_player(newgame,name=pname)
         if not pl:
-            return "Please supply a player name."
             newgame.close()
+            return "Please supply a player name."
+            
         raise cherrypy.HTTPRedirect("/game/"+newgame.id)
 
     @cherrypy.expose
@@ -129,7 +129,7 @@ class GameHandler(Site):
         else:
             raise cherrypy.NotFound
         player = self.get_session_player(game)
-
+        game.check_activity()
         if game.closed:
             raise cherrypy.NotFound
 
@@ -138,7 +138,10 @@ class GameHandler(Site):
 
         if action=='click':
             data = self.clickresponse(game, player, int(kwargs['x']), int(kwargs['y']))
-            if data: self.send_data(game,{'reveal':data})
+            if data: data = {'reveal':data}
+            if game.time_won>0:
+                data['won']=True
+            if data: self.send_data(game,data)
 
         elif action=='flag':
             x = int(kwargs['x'])

@@ -1,6 +1,7 @@
 
 from random import randint, choice
 import string
+import time
 
 #In order of increasing wordyness
 class BoardError(Exception): pass
@@ -50,6 +51,7 @@ class Game():
         self.started = False
         self.name = name
         self.board = Board(width,height,mines,wrap)
+        self.tiles_remaining = width*height - self.board.bombs
         #generate random id
         id = ''
         while (id=='' or id in Game.games):
@@ -57,6 +59,8 @@ class Game():
         self.id = id
         Game.games[id] = self
         self.players=[]
+        self.time_started = time.time()
+        self.time_won = 0
         
     @property
     def width(self): return self.game.width
@@ -80,13 +84,22 @@ class Game():
             t = self.board.get_tile(x,y)
             t.uncovered = player.id
             return [t]
-        return self.board.reveal(player.id,x,y)
+        r = self.board.reveal(player.id,x,y)
+        if r: self.tiles_remaining-=len(r)
+        if self.tiles_remaining == 0:
+            self.time_won = time.time()
+            self.close()
+            
+        return r
 
     def flag(self,player,x,y):
         return self.board.flag(player.id,x,y)
 
     def check_activity(self):
         if not True in [p.present for p in self.players]:
+            self.close()
+            return False
+        if time.time() > self.time_started + 60*60:
             self.close()
             return False
         return True
