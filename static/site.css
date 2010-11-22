@@ -17,8 +17,10 @@ body {
     border-left: black medium solid;
     border-right: black medium solid;
     border-bottom: black medium solid;
-    border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomright: 10px;
+    -moz-border-radius-bottomleft: 10px;
     border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     padding: 20px;
 }
 
@@ -27,6 +29,8 @@ body {
     margin-right: 6%;
     background-color: #ccccff;
     border: black medium solid;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
 }
