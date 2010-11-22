@@ -23,6 +23,7 @@ Game = new function() {
         //Set these callbacks to draw the game.
         this.renderGameFunc = function () {};
         this.renderPlayersFunc = function() {};
+        this.onWin = function () {};
 
         for (i = 0; i < w * h; i = i + 1) {
             this.data[i] = new Tile();

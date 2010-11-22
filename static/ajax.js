@@ -67,6 +67,10 @@ Net = new function() {
             
             game.RenderGame();
         }
+        if (obj.win)
+        {
+            game.onWin();
+        }
         if (poll) {
             poll(game);
         }

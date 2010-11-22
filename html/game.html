@@ -16,15 +16,11 @@
 
             Page = new function () {
 
-
                 this.getCol = function (plid) {
                     return (['#fff','#f44', '#4f4', '#44f','#ff4','#f4f','#4ff'])[plid];
                 }
 
                 this.Start = function () {
-
-   
-
                     /*
                      * The Game is a global object (there only needs to be one).
                      * However, in order to avoid reliance on this fact, it is often
@@ -54,6 +50,7 @@
                                 }
                             }
                         });
+                        this.innerHTML=' ';
                         //Appropriately modifiy tiles when the server sends back the results.
                         tile.onModify = function() {
                             if (!this.adjacency && this.flag)
@@ -64,7 +61,7 @@
                                 cell.innerHTML = this.adjacency;
                             }
                             else {
-                                cell.innerHTML = '';
+                                cell.innerHTML = ' ';
                             }
                             if (this.flag && this.player===0){
                                 $(cell).css('color',Page.getCol(this.flag));
@@ -91,7 +88,9 @@
                             p.innerHTML+='</li>';
                         }
                     };
-
+                    Game.onWin = function() {
+                        $('.win').append("Game finished!");
+                    };
                     //Chrome doesn't seem to like sending a request straight away.
                     if (/chrome/.test(navigator.userAgent.toLowerCase())){
                         setTimeout("Net.Refresh(Game);",400);
@@ -112,8 +111,8 @@
             <h1>$title: $game.name</h1>
         </div>
         <div class="container_main">
-        <a href ="../">Go back</a>
-
+            <a href ="../">Go back</a>
+            <div class="win"></div>
             <table id="grid">
                 #for $row in $range($game.board.height)
                     <tr>
