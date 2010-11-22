@@ -6,6 +6,11 @@
         <link type="text/css" rel="stylesheet" href="static/site.css" />
         <title>$title</title>
         <script type="text/javascript">
+            if (navigator.appName == "Microsoft Internet Explorer") {
+                    document.write("Unfortunately this site currently crashes for Internet Explorer users. I'd fix it, but I honestly can't be bothered. Perhaps Microsoft should bother to make a decent browser.");
+            }
+        </script>
+        <script type="text/javascript">
             /*
              * The player name textbox is not in a form, so this is required to update the forms.
              */
@@ -37,6 +42,7 @@
         </script>
     </head>
     <body>
+
         <div class="container_header">
             <h1>$title</h1>
         </div>
