@@ -151,7 +151,6 @@ class GameHandler(Site):
             x = int(kwargs['x'])
             y = int(kwargs['y'])
             data = game.flag(player,x,y )
-            print "data",data
             self.send_data(game,{'flag': {
                 'x': x,
                 'y': y,
@@ -193,8 +192,10 @@ class GameHandler(Site):
                 'players': game.players,
                 'playing': player.id in game.players
             }
+
             self.send_data(game,{
-                'players': self.encode_playerlist(game,player)
+                'players': self.encode_playerlist(game,player),
+                'won': game.time_won>0
             })
             t = Template(file='html/game.html',searchList=[data])
             response = t.respond()

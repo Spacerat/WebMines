@@ -65,11 +65,12 @@ Net = new function() {
             
             game.RenderGame();
         }
-        if (obj.win)
+        if (obj.won)
         {
             game.onWin();
         }
         if (poll) {
+
             poll(game);
         }
 

@@ -59,7 +59,7 @@ class Game():
         self.id = id
         Game.games[id] = self
         self.players=[]
-        self.time_started = time.time()
+        self.timeout_time = time.time()+60*5
         self.time_won = 0
         
     @property
@@ -78,6 +78,7 @@ class Game():
         return self.players[id-1]
 
     def click(self,player,x,y):
+        self.timeout_time = time.time() + 60*5
         if self.board.get_flag(x,y)==player.id:
             return
         if self.board.is_bomb(x,y):
@@ -88,7 +89,6 @@ class Game():
         if r: self.tiles_remaining-=len(r)
         if self.tiles_remaining == 0:
             self.time_won = time.time()
-            self.close()
             
         return r
 
@@ -99,7 +99,10 @@ class Game():
         if not True in [p.present for p in self.players]:
             self.close()
             return False
-        if time.time() > self.time_started + 60*60:
+        if time.time() > self.time_won+1 and self.time_won>0:
+            self.close()
+            return False
+        if time.time() > self.timeout_time:
             self.close()
             return False
         return True
