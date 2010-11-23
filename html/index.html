@@ -3,13 +3,9 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
         <link type="text/css" rel="stylesheet" href="static/site.css" />
         <title>$title</title>
-        <script type="text/javascript">
-            if (navigator.appName == "Microsoft Internet Explorer") {
-                    document.write("Unfortunately this site currently crashes for Internet Explorer users. I'd fix it, but I honestly can't be bothered. Perhaps Microsoft should bother to make a decent browser.");
-            }
-        </script>
         <script type="text/javascript">
             /*
              * The player name textbox is not in a form, so this is required to update the forms.
@@ -20,6 +16,12 @@
                 for (elem in h) {
                     h[elem].value = newname;
                 }
+                //This bit for the sake of internet explorer.
+                $.ajax({
+                    type: "POST",
+                    url: 'name',
+                    data: "name="+newname
+                });
             }
 
             function defMinesChanged(newvalue) {

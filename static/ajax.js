@@ -12,10 +12,8 @@ Net = new function() {
     /*
      * Process received data. Call poll(game) when this is done.
      */
-    var ProcessData = function (xmlhttp, game, poll) {
-        var str = xmlhttp.responseText;
-        var obj = JSON.parse(str);
-        var data;
+    var ProcessData = function (data, game, poll) {
+        var obj = data
         if (obj.reveal)
         {
             data = obj.reveal;
@@ -79,41 +77,32 @@ Net = new function() {
     }
 
     var SendRequest = function (game, method, string, reply, poll) {
-        var xmlhttp = new XMLHttpRequest();
-        if (reply){
-            xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    if (poll) {
-                        ProcessData(xmlhttp, game, Net.Poll);
-                    }
-                    else {
-                        ProcessData(xmlhttp, game, null);
-                    }
+        var request = {type: method,data: string, dataType: "json"};
+        if (reply) {
+            request.success = function(data) {
+                if (poll) {
+                    ProcessData(data,game,Net.Poll);
                 }
-                /*
-                else if (xmlhttp.status === 404) {
-                    //The game no longer exists
-                    alert("The game has timed out.");
+                else {
+                    ProcessData(data, game, null);
                 }
-                */
             };
         }
-        xmlhttp.open(method, string, true);
-        xmlhttp.send();
+        $.ajax(request);
     }
 
     /*
      * Send a poll request.
      */
     this.Poll = function(game) {
-        SendRequest(game,"GET", "?action=poll", true, true);
+        SendRequest(game,"POST", "action=poll", true, true);
     }
 
     /*
      * Send a refresh request.
      */
     this.Refresh = function(game) {
-        SendRequest(game,"GET", "?action=refresh",true, true);
+        SendRequest(game,"POST", "action=refresh",true, true);
     }
 
     /*
@@ -124,15 +113,15 @@ Net = new function() {
             throw "Click coordinates must be integers.";
         }
         if (flag) {
-            SendRequest(null,"GET","?action=flag&x=" + x + "&y=" + y,false,false);
+            SendRequest(null,"POST","action=flag&x=" + x + "&y=" + y,false,false);
         }
         else {
-            SendRequest(null,"GET","?action=click&x=" + x + "&y=" + y,false,false);
+            SendRequest(null,"POST","action=click&x=" + x + "&y=" + y,false,false);
         }
     }
 
     this.sendLeave = function () {
         alert("leaving!")
-        SendRequest(null,"GET","?action=leave",false,false)
+        SendRequest(null,"POST","action=leave",false,false)
     }
 };

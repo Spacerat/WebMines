@@ -47,6 +47,10 @@ class RootHandler(Site):
         return t.respond()
 
     @cherrypy.expose
+    def name(self,name=""):
+        cherrypy.response.cookie['name']=name
+
+    @cherrypy.expose
     def create(self,name="",pname="",width=-1,height=-1,mines=-1,defaultmines=1,wrap=False):
         if defaultmines=='true':
             mines=-1
