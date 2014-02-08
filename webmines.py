@@ -205,6 +205,11 @@ class GameHandler(Site):
         
 
 if __name__ == "__main__":
-    
+    try:
+        port = os.environ['PORT']
+    except KeyError:
+        port = 8200
+    cherrypy.config.update({'server.port': port})
+
     cherrypy.tree.mount(GameHandler(),'/game','config.cfg')
     cherrypy.quickstart(RootHandler(),'/','config.cfg')
