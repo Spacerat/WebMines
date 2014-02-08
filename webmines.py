@@ -206,10 +206,13 @@ class GameHandler(Site):
 
 if __name__ == "__main__":
     try:
-        port = os.environ['PORT']
+        port = int(os.environ['PORT'])
     except KeyError:
+        print "Setting port to default 8080"
         port = 8200
-    cherrypy.config.update({'server.port': port})
+
+    print port
+    cherrypy.config.update({'server.socket_port': port})
 
     cherrypy.tree.mount(GameHandler(),'/game','config.cfg')
     cherrypy.quickstart(RootHandler(),'/','config.cfg')
