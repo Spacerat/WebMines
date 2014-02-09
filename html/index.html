@@ -37,7 +37,7 @@
             function onGameSizeChange() {
                 var f = document.create;
                 if (f.defaultmines.checked == true) {
-                    f.mines.value = Math.floor(((f.width.value * f.height.value)-9)/7);
+                    f.mines.value = Math.floor(((f.width.value * f.height.value)-9)/6);
                 }
                 //int(((width*height)-9)/7)
             }
@@ -52,7 +52,7 @@
             <div style="float:left; width:50%;">
                 <h2>Play!</h2>
                 <label for="name">Player name:</label>
-                <input type="text" value="$name" onChange="updatePlayerName(this.value);"/><br />
+                <input required type="text" value="$name" onChange="updatePlayerName(this.value);"/><br />
 
                 <h3>Join game</h3>
                 <!-- <form method="get" action="join" name="join">
@@ -73,15 +73,15 @@
                     <menu>
                         <li>
                         <label for="name">Game name:</label>
-                        <input type="text" name="name" />
+                        <input type="text" name="name" required/>
                         </li>
                         <li>
                         <label for="width">Width:</label>
-                        <input type="number" name="width" min="5" max="40" value="16" onChange="onGameSizeChange();"/>
+                        <input type="number" name="width" min="5" max="40" value="12" onChange="onGameSizeChange();"/>
                         </li>
                         <li>
                         <label for="height">Height:</label>
-                        <input type="number" name="height" min="5" max="35" value="16" onChange="onGameSizeChange();"/>
+                        <input type="number" name="height" min="5" max="35" value="12" onChange="onGameSizeChange();"/>
                         </li>
                         <li>
                         <label for="defaultmines">Default mines:</label>
@@ -89,10 +89,10 @@
                         </li>
                         <li>
                         <label for="mines">Mines:</label>
-                        <input type="number" name="mines" min="3" max="1000" value="40" disabled />
+                        <input type="number" name="mines" min="3" max="1000" value="19" disabled />
                         </li>
                         <li>
-                        <label for="mines">Wrap minefield:</label>
+                        <label for="mines"><dfn title="With this option on, mines at the edge of the playing field are treated as being adjacent to mines on the opposite side.">Wrap</dfn> minefield:</label>
                         <input type="checkbox" value="true" name="wrap"/>
                         </li>
                     </menu>
@@ -123,6 +123,6 @@
 
         <div>
 
-        
+<a href="https://github.com/Spacerat/WebMines"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
     </body>
 </html>

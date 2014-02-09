@@ -150,6 +150,9 @@ class Board:
             x = randint(0,width-1)
             y = randint(0,height-1)
             if self.set_bomb(x,y): b-=1
+
+        self.reveal(1, 1, 1)
+
             
     #Check if the given coordinates point to a valid tile.
     def validate_coords(self,x,y):
@@ -184,6 +187,9 @@ class Board:
     #Give a tile bomb status
     def set_bomb(self,x,y):
         if self.is_bomb(x,y): return False
+        if (x <3 and y < 3):
+            return False
+
         t = self.get_tile(x,y)
         if t==None:
             raise BoardCoordOutOfRangeError, "Tile coordinate (%d,%d) out of bounds"%(x,y)

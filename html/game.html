@@ -63,7 +63,8 @@
                             else {
                                 cell.innerHTML = ' ';
                             }
-                            if (this.flag && this.player===0){
+
+                            if (this.flag && this.player===0 || this.adjacency === 'X'){
                                 $(cell).css('color',Page.getCol(this.flag));
                             }
                             else {
@@ -111,9 +112,10 @@
             <h1>$title: $game.name</h1>
         </div>
         <div class="container_main">
+            <div>
             <a href ="../">Go back</a>
             <div class="win"></div>
-            <table id="grid">
+            <table id="grid" style="margin-left: auto; margin-right: auto;">
                 #for $row in $range($game.board.height)
                     <tr>
                     #for $cell in $range($game.board.width)
@@ -129,7 +131,30 @@
                 <ul id="playerlist">
                 </ul>
             </div>
+            </div>
+            <div style="display: block;">
+            <h2> How to play </h2>
+            <p>The rules:</p>
+            <ul>
+                <li>Some of the squares in the minefield to your left have mines in them.</li>
+                <li>Left click to reveal squares, right click to place flags</li>
+                <li>When you <strong>left</strong> click on a square, one of three things may happen
+                <ol>
+                    <li> There are <em>no adjacent mines</em>. That square and all surrounding squares are revealed</li>
+                    <li> There are <em>some mines in adjacent squares</em>. A number will appear in the square telling you how many. </li>
+                    <li> There is a <em>mine in the square</em>. This is bad, try not to do this. This will appear as an X.</li>
+                </ol>
+                </li>
+                <li>Flags should be placed in squares which you know definitely contain mines.</li>
+                <li>The objective is to reveal the entire playing field, except the mines.</li>
+            </ul>
+            <p>Currently there is no score kept, or winner/loser. This is just a collaborative game of minesweeper (or if you like, you can use your own scoring system).</p>
+            <p><strong>If a square does nothing when you click it, reload the page.</strong></p>
+            </div>
+
+            <div style="clear: both;"></div>
         </div>
 
+<a href="https://github.com/Spacerat/WebMines"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></
     </body>
 </html>

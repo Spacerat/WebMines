@@ -13,6 +13,13 @@ body {
     min-width: 10em;
 }
 
+dfn {
+    border-bottom: 1px dotted black;
+    cursor: help;
+    font-style: normal;
+}
+
+
 .container_main {
     margin-left: 6%;
     margin-right: 6%;
@@ -28,7 +35,7 @@ body {
 .container_header {
     margin-left: 0%;
     margin-right: 0%;
-    background-color: #223;
+    background-color: #A00;
     text-align: center;
     padding: 10px;
     color: #f8f8f8;
