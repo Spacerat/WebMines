@@ -49,54 +49,79 @@
             <h1>$title</h1>
         </div>
         <div class="container_main">
-            
-            <label for="name">Player name:</label>
-            <input type="text" value="$name" onChange="updatePlayerName(this.value);"/><br />
+            <div style="float:left; width:50%;">
+                <h2>Play!</h2>
+                <label for="name">Player name:</label>
+                <input type="text" value="$name" onChange="updatePlayerName(this.value);"/><br />
 
-            <h2>Join game</h2>
-            <form method="get" action="join" name="join">
-                <input type="hidden" name="pname" value="$name" />
-                <label for="id">Select game:</label>
-                <select name="id" size="$numgames" class="gamebox">
-                    #for $game in $games
-                    <option value="$game.id">$game.name</option>
-                    #end for
-                </select><br />
-                <input type="submit" value="Join"/>
-            </form>
-            <br />
-            <h2>Create game</h2>
-            <form method="post" action="create" name="create">
-                <input type="hidden" name="pname" value="$name" />
-                <menu>
-                    <li>
-                    <label for="name">Game name:</label>
-                    <input type="text" name="name" />
-                    </li>
-                    <li>
-                    <label for="width">Width:</label>
-                    <input type="number" name="width" min="5" max="40" value="16" onChange="onGameSizeChange();"/>
-                    </li>
-                    <li>
-                    <label for="height">Height:</label>
-                    <input type="number" name="height" min="5" max="35" value="16" onChange="onGameSizeChange();"/>
-                    </li>
-                    <li>
-                    <label for="defaultmines">Default mines:</label>
-                    <input type="checkbox" value="true" name="defaultmines" onChange="defMinesChanged(this.checked);" checked />
-                    </li>
-                    <li>
-                    <label for="mines">Mines:</label>
-                    <input type="number" name="mines" min="3" max="1000" value="40" disabled />
-                    </li>
-                    <li>
-                    <label for="mines">Wrap minefield:</label>
-                    <input type="checkbox" value="true" name="wrap"/>
-                    </li>
-                </menu>
-            <input type="submit" value="Create"/>
-            </form>
-        </div>
+                <h3>Join game</h3>
+                <!-- <form method="get" action="join" name="join">
+                    <input type="hidden" name="pname" value="$name" />
+                    <label for="id">Select game:</label> -->
+                    <!-- <select name="id" size="$numgames" class="gamebox"> -->
+                        #for $game in $games
+                        <!-- <option value="$game.id">$game.name</option> -->
+                        <a href="join?pname=$name&amp;id=$game.id">$game.name - <%= len(game.players) %> players</a><br>
+                        #end for
+                    <!-- </select><br /> -->
+                    <!-- <input type="submit" value="Join"/> -->
+                <!-- </form> -->
+                <br />
+                <h3>Create game</h3>
+                <form method="post" action="create" name="create">
+                    <input type="hidden" name="pname" value="$name" />
+                    <menu>
+                        <li>
+                        <label for="name">Game name:</label>
+                        <input type="text" name="name" />
+                        </li>
+                        <li>
+                        <label for="width">Width:</label>
+                        <input type="number" name="width" min="5" max="40" value="16" onChange="onGameSizeChange();"/>
+                        </li>
+                        <li>
+                        <label for="height">Height:</label>
+                        <input type="number" name="height" min="5" max="35" value="16" onChange="onGameSizeChange();"/>
+                        </li>
+                        <li>
+                        <label for="defaultmines">Default mines:</label>
+                        <input type="checkbox" value="true" name="defaultmines" onChange="defMinesChanged(this.checked);" checked />
+                        </li>
+                        <li>
+                        <label for="mines">Mines:</label>
+                        <input type="number" name="mines" min="3" max="1000" value="40" disabled />
+                        </li>
+                        <li>
+                        <label for="mines">Wrap minefield:</label>
+                        <input type="checkbox" value="true" name="wrap"/>
+                        </li>
+                    </menu>
+                <input type="submit" value="Create"/>
+                </form>
+            </div>
+
+            <div style="width: 50%; float: left;">
+            <h2> Some words on AjaxMines </h2>
+            <p> AjaxMines is a collaborative minesweeper game that I made over 3 years ago, as my first
+            adventure in to the world of creating multiplayer web-based games. Although it is functional, and I never fully completed working on it once I'd completed the basic engine. Still, it's here today for historical reasons, and also because it's still kind of cool. Even today if I wanted a game of multiplayer minesweeper I might choose it over other services which require that you register an account or sit through ads!
+            </p>
+            <h3> How to play </h3>
+            <ol>
+            <li>Set a player name</li>
+            <li>Join a game if one exists by clicking on its link</li>
+            <li>Otherrwise, create one! Give it a name, set some settings, click Create, then send people the URL so they can join you.</li>
+            </ol>
+            <h3> Known bugs and omissions</h3>
+            <ul>
+            <li>Completed games often take a while to disappear from the "Select game" menu</li>
+            <li>Sometimes clicks in game don't get synchronised between all players. Reloading the page fixes this</li>
+            <li>You have to refresh the homepage to reload the game list</li>
+            <li> The website is ugly as sin!</li>
+            </ul>
+            </div>
+            <div style="clear: both;">
+
+        <div>
 
         
     </body>
