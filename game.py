@@ -26,7 +26,6 @@ class Player():
         self.name = name
         self.id = id
         self.present = True
-
         self.polldata = None
 
     def send_data(self,data):
